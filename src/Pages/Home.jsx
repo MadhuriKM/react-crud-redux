@@ -2,9 +2,19 @@ import React, { useEffect, useState } from 'react'
 import UserApi from '../API/UserApi'
 import { toast } from 'react-toastify'
 import { NavLink } from 'react-router-dom'
+import ReactPaginate from 'react-paginate'
 
 function Home() {
   const [users, setUsers] = useState([])
+
+  const [index,setIndex] = useState(0)  // beginning index
+
+  const itemsPerPage = 5
+  const endIndex = index + itemsPerPage; // ending index
+  const pCount = Math.ceil( users.length / itemsPerPage) // page count
+
+  // curremt active page items
+  const currentUsers = users.slice(index,endIndex)
 
   const readHandler = async () => {
     await UserApi.readAll().then(res => {
@@ -42,7 +52,7 @@ function Home() {
               </thead>
               <tbody>
                 {
-                  users && users.map((item,index) => {
+                  currentUsers && currentUsers.map((item,index) => {
                     return (
                       <tr key={index} className='text-center'>
                         <td> {item._id} </td>
@@ -51,7 +61,7 @@ function Home() {
                         <td> {item.mobile} </td>
                         <td> {item.isActive ? <strong className='text-success'>Active</strong> : <strong className='text-danger'>Blocked</strong>} </td>
                         <td>
-                          <NavLink className="btn btn-sm btn-info" title='Edit'>
+                          <NavLink to={`/edit/${item._id}`} className="btn btn-sm btn-info" title='Edit'>
                             <i className="bi bi-pencil"></i>
                           </NavLink>
 
@@ -64,6 +74,9 @@ function Home() {
                   })
                 }
               </tbody>
+              <tfoot>
+                <ReactPaginate pageCount={pCount} />
+              </tfoot>
             </table>
           </div>
         </div>
