@@ -16,6 +16,13 @@ function Home() {
   // curremt active page items
   const currentUsers = users.slice(index,endIndex)
 
+  // page item handler
+  const pageItemHandler = (e) => {
+    console.log(`selected item=`,e.selected) // pageitem index
+    let newIndex = (e.selected * itemsPerPage) % users.length;
+    setIndex(newIndex)
+  }
+
   const readHandler = async () => {
     await UserApi.readAll().then(res => {
       console.log(`data =`, res)
@@ -28,7 +35,20 @@ function Home() {
 
   useEffect(()=> {
     readHandler()
-  },[])
+  },[users])
+
+// delete
+const deleteHandler = async (id) => {
+  if(window.confirm(`Are you sure to delete user id?`)) {
+    await UserApi.deleteUser(id)
+     .then(res => {
+         toast.success(res.data.msg)
+     }).catch(err => toast.error(err.response.data.msg))
+  } else {
+    toast.warning(`delete terminated`)
+  }
+}
+
   return (
     <div className='container'>
       <div className="row mt-4">
@@ -65,7 +85,7 @@ function Home() {
                             <i className="bi bi-pencil"></i>
                           </NavLink>
 
-                          <button className="btn btn-sm btn-danger" title='Delete'>
+                          <button onClick={() => deleteHandler(item._id)} className="btn btn-sm btn-danger" title='Delete'>
                             <i className="bi bi-trash"></i>
                           </button>
                         </td>
@@ -75,7 +95,25 @@ function Home() {
                 }
               </tbody>
               <tfoot>
-                <ReactPaginate pageCount={pCount} />
+                <tr>
+                  <th colSpan={6}>
+                  <ReactPaginate
+                 pageCount={pCount} 
+                 onPageChange={pageItemHandler}
+                 className='pagination justify-content-center'
+                 pageClassName='page-item'
+                 pageLinkClassName='page-link'
+                 nextClassName='page-item'
+                 nextLinkClassName='page-link'
+                 previousClassName='page-item'
+                 previousLinkClassName='page-link'
+                 activeClassName='active'
+                 activeLinkClassName='active'
+                 breakLabel="..."
+                 pageRangeDisplayed={3}
+                 />
+                  </th>
+                </tr>
               </tfoot>
             </table>
           </div>
